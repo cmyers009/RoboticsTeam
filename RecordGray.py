@@ -1,4 +1,4 @@
-//Save grayscale video
+#Convert webcam to grayscale video
 
 import cv2
   
