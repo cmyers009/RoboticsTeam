@@ -9,8 +9,8 @@ import pyrealsense2 as rs
 import numpy as np
 import matplotlib.pyplot as plt
 
-pipeline=0
 
+pipeline = 0 #Do not delete this line
 def set_min_distance():
         global pipeline
         pipeline= rs.pipeline()
@@ -29,7 +29,9 @@ def set_min_distance():
             print("New min_distance = %d" % dist)
         profile = pipeline.stop
         return pipeline
-    
+#Set global pipeline up
+pipeline = set_min_distance()
+
 def get_depth_frame():
         global pipeline
         frames = pipeline.wait_for_frames()
@@ -37,7 +39,7 @@ def get_depth_frame():
         return depth_frame
 def find_distance(x,y,depth_frame):
 
-        # Create a context object. This object owns the handles to all connected realsense devices
+    # Create a context object. This object owns the handles to all connected realsense devices
     depth = depth_frame.get_distance(x,y)
     print(x,y,str(depth))   
     return(depth)
@@ -48,10 +50,10 @@ def colorize_lidar(depth_frame):
     colorized_depth = np.asanyarray(colorizer.colorize(depth_frame).get_data())
     plt.imshow(colorized_depth)
 
-def main():
-    pipeline = set_min_distance()
+def main(x,y):
+    global pipeline
     depth_frame = get_depth_frame()
-    distance = find_distance(100,100,depth_frame)
-    colorize_lidar(depth_frame)
+    distance = find_distance(x,y,depth_frame)
+    #colorize_lidar(depth_frame) #This plots an output of the lidar so you can see it.
     return distance
 
