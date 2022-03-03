@@ -8,8 +8,8 @@ Based on: https://www.youtube.com/watch?v=dZ4itBvIjVY&t=322s
 
 import cv2
 
-path="./front_on_cascade_1920_1080.xml"
-cameraNo=1
+path="./cascade.xml"
+cameraNo=0
 objectName="Beads"
 frameWidth=1920
 frameHeight=1080
