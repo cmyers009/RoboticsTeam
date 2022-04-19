@@ -7,8 +7,8 @@ Created on Tue Mar  1 18:41:44 2022
 
 import pyrealsense2 as rs
 import numpy as np
-import matplotlib.pyplot as plt
-
+#import matplotlib.pyplot as plt
+import cv2
 
 pipeline = 0 #Do not delete this line
 def set_min_distance():
@@ -46,14 +46,27 @@ def find_distance(x,y,depth_frame):
 
 
 def colorize_lidar(depth_frame):
-    colorizer = rs.colorizer()
-    colorized_depth = np.asanyarray(colorizer.colorize(depth_frame).get_data())
-    plt.imshow(colorized_depth)
 
+    colorizer = rs.colorizer(color_scheme=2)
+    colorizer.set_option(rs.option.max_distance,.5)
+    colorized_depth = np.asanyarray(colorizer.colorize(depth_frame).get_data())
+    
+    im_gray=cv2.cvtColor(colorized_depth, cv2.COLOR_BGR2GRAY)
+    #plt.imshow(im_gray)
+    out=cv2.threshold(im_gray,1,255,cv2.THRESH_BINARY)
+    #out=plt.imread(out)
+
+    
+    img = out[1]
+    return img
 def main(x,y):
     global pipeline
     depth_frame = get_depth_frame()
     distance = find_distance(x,y,depth_frame)
-    #colorize_lidar(depth_frame) #This plots an output of the lidar so you can see it.
+    colorize_lidar(depth_frame) #This plots an output of the lidar so you can see it.
     return distance
 
+main(10,10)
+depth_frame = get_depth_frame()
+#print(depth_frame.as_points())
+#print(find_distance(300,300,depth_frame))
