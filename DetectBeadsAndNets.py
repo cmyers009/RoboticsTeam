@@ -12,6 +12,7 @@ import pyrealsense_test as prt
 
 
 def mask_net(img):
+    #Mask net based on RGB values.  Detect only white and gray pixels because this is a white net.
     j = 5
     start = 115
     end = 160
@@ -27,6 +28,7 @@ def mask_net(img):
     return mask
 
 def mask_red_bead(hsv):
+    #HSV Thresholds that detect the red beads and does not pick up noise.
     red_thres = [
                  [[0,13,118],[0,33,198]],
                  [[0,151,39],[1,171,119]],
@@ -41,8 +43,6 @@ def mask_red_bead(hsv):
                  [[93,255,0],[113,255,0]],
                  [[158,164,32],[178,184,112]],  
                  [[179,138,25],[180,213,188]],
-                 
-                 
                  ]
     
     for index,thres in enumerate(red_thres):
@@ -56,6 +56,7 @@ def mask_red_bead(hsv):
     return mask
 
 def mask_green_bead(hsv):
+    #HSV Thresholds that detect the green beads and does not pick up noise.
     green_thres = [[[76,176,49],[96,196,129]],
                    [[76,227,61],[96,247,141]],
                    [[71,255,19],[91,255,99]],
@@ -74,6 +75,7 @@ def mask_green_bead(hsv):
             mask = cv2.bitwise_or(mask,temp_mask)
     return mask
 
+#Unused function for finding contours.  Was not needed.
 def getBordered(image, width):
     bg = np.zeros(image.shape)
     contours, _ = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -86,8 +88,8 @@ def getBordered(image, width):
             bigcontour = contour
     return cv2.drawContours(bg, [bigcontour], 0, (255, 255, 255), width).astype(bool) 
 
-#Works Perfect
 def mask_blue_bead(hsv):
+    #HSV Thresholds that detect the blue beads and does not pick up noise.
     blue_thres = [[[95,215,55],[115,235,135]],
                   [[96,113,0],[116,133,0]],
                   [[95,228,50],[115,248,130]],
@@ -104,6 +106,7 @@ def mask_blue_bead(hsv):
             mask = cv2.bitwise_or(mask,temp_mask)
     return mask
 def mask_purple_bead(hsv):
+    #HSV Thresholds that detect the purple beads and does not pick up noise.
     purple_thres = [[[118,144,79],[138,164,159]],
                     [[118,108,40],[138,128,120]],
                     [[121,113,22],[141,133,102]],
@@ -139,22 +142,23 @@ def get_bead_output(img,distance_mask):
     global bead_cascade
     objectName="Beads"
     color=(255,0,255)
-    
+    #Get hsv image.
     hsv = cv2.cvtColor(img,cv2.COLOR_BGR2HSV) 
-    
+    #Get masks for each color. Separating the colors helps to isolate noise.
     red_bead_mask = mask_red_bead(hsv)
     green_bead_mask = mask_green_bead(hsv)
     blue_bead_mask = mask_blue_bead(hsv)
     purple_bead_mask = mask_purple_bead(hsv)
-    
+    #Combine all masks
     bead_mask = merge_all_masks([distance_mask,red_bead_mask,green_bead_mask,blue_bead_mask,purple_bead_mask])
-   
+    #Get color information from the bead mask.
     bead_color_mask = cv2.bitwise_and(img, img, mask=bead_mask)
     
     #cv2.imshow("Bead Color Mask",bead_color_mask)
     
     scaleVal = 1+(cv2.getTrackbarPos("Scale","Detect_Beads")/1000)
     neig = cv2.getTrackbarPos("Neig","Detect_Beads")
+    #HAAR Cascade
     objects = bead_cascade.detectMultiScale(bead_color_mask,scaleVal,neig)
     
         #Draw Boxes around Objects
@@ -182,6 +186,7 @@ def get_net_output(img,distance_mask):
     
     return net_mask
 
+#Image saving script
 def save_images(bead_output,net_output,count):
     bead_output_name = "./bead_output/output" + str(count) + ".jpg"
     net_output_name = "./net_output/output"+str(count)+".jpg"
@@ -198,7 +203,7 @@ def get_image(camera_no):
         return img
    
 
-
+#Initialization
 bead_path="./masked_bead_cascade.xml"
 cameraNo=1
 objectName="Beads"
