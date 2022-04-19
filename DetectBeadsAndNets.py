@@ -8,7 +8,7 @@ Based on: https://www.youtube.com/watch?v=dZ4itBvIjVY&t=322s
 
 import cv2
 import numpy as np
-#import pyrealsense_test as prt
+import pyrealsense_test as prt
 
 
 def mask_net(img):
@@ -135,7 +135,7 @@ def merge_all_masks(masks):
     return merge
 
 
-def get_bead_output(img):
+def get_bead_output(img,distance_mask):
     global bead_cascade
     objectName="Beads"
     color=(255,0,255)
@@ -147,7 +147,7 @@ def get_bead_output(img):
     blue_bead_mask = mask_blue_bead(hsv)
     purple_bead_mask = mask_purple_bead(hsv)
     
-    bead_mask = merge_all_masks([red_bead_mask,green_bead_mask,blue_bead_mask,purple_bead_mask])
+    bead_mask = merge_all_masks([distance_mask,red_bead_mask,green_bead_mask,blue_bead_mask,purple_bead_mask])
    
     bead_color_mask = cv2.bitwise_and(img, img, mask=bead_mask)
     
@@ -171,13 +171,13 @@ def get_bead_output(img):
     
     return bead_color_mask
 
-def get_net_output(img):
+def get_net_output(img,distance_mask):
     path="./masked_net_cascade.xml"
     objectName="Net"
     color=(255,0,255)
     
-    net_mask = mask_net(pre_img)
-    
+    net_color_mask = mask_net(pre_img)
+    net_mask = merge_all_masks([net_color_mask,distance_mask])
     #cv2.imshow("Net Mask",net_mask)
     
     return net_mask
@@ -232,20 +232,17 @@ bead_cascade=cv2.CascadeClassifier(bead_path)
 
 count = 0
 
-
-
-
-
 while True:
 
     
     success,pre_img = cap0.read()
-    #distance_binary = prt.colorize_lidar(prt.get_depth_frame())
+    distance_binary = prt.colorize_lidar(prt.get_depth_frame())
+    
 
     img = pre_img
 
-    bead_output = get_bead_output(pre_img)
-    net_output = get_net_output(pre_img)
+    bead_output = get_bead_output(pre_img, distance_binary)
+    net_output = get_net_output(pre_img, distance_binary)
 
     #save_images(bead_output,net_output,count)
 
